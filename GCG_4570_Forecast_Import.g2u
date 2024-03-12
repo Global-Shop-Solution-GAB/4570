@@ -1,0 +1,442 @@
+Program.Sub.ScreenSU.Start
+Gui.Selection..create
+Gui.Selection..caption("Forecast Import - Select File to Import")
+Gui.Selection..size(14970,3075)
+Gui.Selection..minx(0)
+Gui.Selection..miny(0)
+Gui.Selection..position(0,0)
+Gui.Selection..event(UnLoad,form1_unload)
+Gui.Selection..forecolor(0)
+Gui.Selection..BackColor(-2147483633)
+Gui.Selection..mousepointer(0)
+Gui.Selection..sizeable(False)
+Gui.Selection.frame1.Create(Frame)
+Gui.Selection.frame1.Size(14505,2430)
+Gui.Selection.frame1.Position(60,105)
+Gui.Selection.frame1.Caption(".xls File")
+Gui.Selection.lbl1.create(label,"File path",True,1935,255,1,195,345,True,0,Arial,8,-2147483633,0)
+Gui.Selection.lbl1.defaultvalue("")
+Gui.Selection.lbl1.Parent("frame1")
+Gui.Selection.txtBrowseFile.create(textbox,"",True,13485,300,0,180,585,True,0,Arial,8,-2147483643,1)
+Gui.Selection.txtBrowseFile.defaultvalue("")
+Gui.Selection.txtBrowseFile.Parent("frame1")
+Gui.Selection.cmdBrwsFile.create(button)
+Gui.Selection.cmdBrwsFile.caption("^")
+Gui.Selection.cmdBrwsFile.size(525,375)
+Gui.Selection.cmdBrwsFile.position(13815,555)
+Gui.Selection.cmdBrwsFile.event(Click,cmdbrwsfile_click)
+Gui.Selection.cmdBrwsFile.defaultvalue("")
+Gui.Selection.cmdBrwsFile.Parent("frame1")
+Gui.Selection.cmdUpload.create(button)
+Gui.Selection.cmdUpload.caption("Import")
+Gui.Selection.cmdUpload.size(855,375)
+Gui.Selection.cmdUpload.position(180,1815)
+Gui.Selection.cmdUpload.event(Click,cmdupload_click)
+Gui.Selection.cmdUpload.defaultvalue("")
+Gui.Selection.cmdUpload.Parent("frame1")
+Gui.Selection.lbl2.Create(Label,"Sheet",True,630,255,0,195,1080,True,0,"Arial",8,-2147483633,0)
+Gui.Selection.lbl2.Parent("frame1")
+Gui.Selection.txtSheet.Create(TextBox,"2",True,480,300,0,195,1305,True,0,"Arial",8,-2147483643,1)
+Gui.Selection.txtSheet.Parent("frame1")
+Gui.Selection.txtSheet.MaxLength(2)
+Gui.ProcessBar..Create
+Gui.ProcessBar..Size(6945,3120)
+Gui.ProcessBar..MinX(0)
+Gui.ProcessBar..MinY(0)
+Gui.ProcessBar..Position(0,0)
+Gui.ProcessBar..BackColor(-2147483633)
+Gui.ProcessBar..MousePointer(0)
+Gui.ProcessBar.proBar.Create(ProgressBar)
+Gui.ProcessBar.proBar.Size(6165,255)
+Gui.ProcessBar.proBar.Position(270,840)
+Gui.ProcessBar.lblProcess.Create(Label,"Label",True,6165,255,0,270,615,True,0,"Arial",8,-2147483633,0)
+Gui.ProcessBar.progressBarCollectInfo.Create(ProgressBar)
+Gui.ProcessBar.progressBarCollectInfo.Size(6165,255)
+Gui.ProcessBar.progressBarCollectInfo.Position(270,1875)
+Gui.ProcessBar.lblCollectInfo.Create(Label,"..checking valid Customer - Part - Router - Date - Qty",True,4200,255,0,300,1650,True,0,"Arial",8,-2147483633,0)
+Gui.ProcessBar.lblRecord.Create(Label,"",True,750,255,0,4620,1650,True,4,"Arial",8,-2147483633,0)
+Gui.ProcessBar.lblTotalRecord.Create(Label,"",True,555,255,0,5850,1650,True,4,"Arial",8,-2147483633,0)
+Gui.ProcessBar.lbl1.Create(Label,"of",True,285,255,0,5535,1620,True,0,"Arial",8,-2147483633,0)
+Gui.ProcessBar.lbl2.Create(Label,"Sub Process",True,1215,255,0,315,1350,True,0,"Arial",8,-2147483633,0)
+Gui.ProcessBar.lbl3.Create(Label,"Total Process",True,1230,255,0,270,300,True,0,"Arial",8,-2147483633,0)
+Program.Sub.ScreenSU.End
+
+Program.Sub.Preflight.Start
+v.Global..BulkDeclareString(sFileExcel, sFileExcel_Result, sOrderFile, sFileDirOrd, sOrderNum)
+Program.Sub.Preflight.End
+
+Program.Sub.Main.Start
+'BN Apr 3, 2017
+'This project will import an .xls file to tables FORECAST_IMPORT_HDR and FORECAST_IMPORT_LINE
+'After processing, the project will create an .xls result file with the name as OriginalFile_Terminal_Result.xls in the same folder of the uploaded .xls file.
+F.Intrinsic.Control.SetErrorHandler("Main_Err")
+F.Intrinsic.Control.ClearErrors
+V.Local.sError.Declare(String)
+v.Local.bExist.Declare(boolean)
+
+F.ODBC.Connection!conX.OpenConnection(V.Ambient.PDSN,V.Ambient.PUser,V.Ambient.PPass)
+gui.Selection..Show
+gui.Selection.cmdBrwsFile.SetFocus
+
+F.Intrinsic.Control.ExitSub
+
+F.Intrinsic.Control.Label("Main_Err")
+F.Intrinsic.Control.If(V.Ambient.ErrorNumber,<>,0)
+	Function.Intrinsic.String.Concat("Project: GCG_4418_UpSales.gas",V.Ambient.Newline,V.Ambient.Newline,"Subroutine: ",V.Ambient.CurrentSubroutine,V.Ambient.NewLine,"Error Occurred ",V.Ambient.ErrorNumber," with description ",V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	F.Intrinsic.Control.CallSub(Form1_unload)
+Function.Intrinsic.Control.EndIf
+
+Program.Sub.Main.End
+
+Program.Sub.form1_unload.Start
+F.Intrinsic.Control.SetErrorHandler("form1_unload_Err")
+F.Intrinsic.Control.ClearErrors
+V.Local.sError.Declare(String)
+
+F.ODBC.Connection!conX.Close
+F.Intrinsic.Control.End
+
+F.Intrinsic.Control.ExitSub
+
+F.Intrinsic.Control.Label("form1_unload_Err")
+F.Intrinsic.Control.If(V.Ambient.ErrorNumber,<>,0)
+	Function.Intrinsic.String.Concat("Project: GCG_4418_UpSales_v1.g2u",V.Ambient.Newline,V.Ambient.Newline,"Subroutine: ",V.Ambient.CurrentSubroutine,V.Ambient.NewLine,"Error Occurred ",V.Ambient.ErrorNumber," with description ",V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+Function.Intrinsic.Control.EndIf
+
+Program.Sub.form1_unload.End
+
+Program.Sub.cmdbrwsfile_click.Start
+F.Intrinsic.Control.SetErrorHandler("cmdbrwsfile_click_Err")
+F.Intrinsic.Control.ClearErrors
+V.Local.sError.Declare(String)
+
+'open a file explorer and look for an xls sheet
+F.Intrinsic.UI.ShowOpenFileDialog("",".xls",V.Global.sFileExcel)
+F.Intrinsic.Control.If(V.Global.sFileExcel,=,"***CANCEL***")
+	F.Intrinsic.UI.Msgbox("No File Was Selected")
+	F.Intrinsic.Control.ExitSub
+F.Intrinsic.Control.EndIf
+
+gui.Selection.txtBrowseFile.Text(V.Global.sFileExcel)
+
+F.Intrinsic.Control.ExitSub
+
+F.Intrinsic.Control.Label("cmdbrwsfile_click_Err")
+F.Intrinsic.Control.If(V.Ambient.ErrorNumber,<>,0)
+	Function.Intrinsic.String.Concat("Project: GCG_4418_UpSales.gas",V.Ambient.Newline,V.Ambient.Newline,"Subroutine: ",V.Ambient.CurrentSubroutine,V.Ambient.NewLine,"Error Occurred ",V.Ambient.ErrorNumber," with description ",V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	F.Intrinsic.Control.End
+
+Function.Intrinsic.Control.EndIf
+
+Program.Sub.cmdbrwsfile_click.End
+
+Program.Sub.cmdupload_click.Start
+F.Intrinsic.Control.SetErrorHandler("cmdupload_click_Err")
+F.Intrinsic.Control.ClearErrors
+V.Local..BulkDeclareString(sError, sSQL, sRow, sCol, sDueDate, sPart, sRev, sPart17, sHold, sCheckError) 
+v.Local..BulkDeclareLong(iCounter, iRowNum, iCheckResult, iQuit, iError, iNum)
+v.Local..BulkDeclareBoolean(bExists, bGoodData, bGoodPart, bGoodRouter, bGoodCustomer, bGoodDate, bGoodQty, bIsNumeric)
+
+'Check input data on the window
+'File path
+f.Intrinsic.Control.If(v.Screen.Selection!txtBrowseFile.Text.Trim, = , "")
+	f.Intrinsic.UI.Msgbox("Please select an Excel file")
+	f.Intrinsic.Control.ExitSub
+f.Intrinsic.Control.EndIf
+
+'Sheet number
+f.Intrinsic.Control.If(v.Screen.Selection!txtSheet.Text.Trim, = , "")
+	f.Intrinsic.UI.Msgbox("Please enter a sheet number")
+	f.Intrinsic.Control.ExitSub
+f.Intrinsic.Control.EndIf
+f.Intrinsic.Math.IsNumeric(v.Screen.Selection!txtSheet.Text.Trim,v.Local.bIsNumeric)
+f.Intrinsic.Control.If(v.Local.bIsNumeric, = , false)
+	f.Intrinsic.UI.Msgbox("Please enter numeric value for sheet number")
+	f.Intrinsic.Control.ExitSub
+f.Intrinsic.Control.EndIf
+
+'We copy this file, then write result to that file
+f.Intrinsic.String.Split(v.Global.sFileExcel,".",v.Local.sHold)
+f.Intrinsic.String.Concat(v.Local.sHold(0),"_",v.Caller.Terminal,"_Result.xls",v.Global.sFileExcel_Result)
+F.Intrinsic.File.CopyFile(V.Global.sFileExcel,V.Global.sFileExcel_Result)
+
+gui.ProcessBar.proBar.Max(10)
+gui.ProcessBar.proBar.Value(1)
+gui.ProcessBar.lblProcess.Text("...collecting data")
+gui.ProcessBar..Show
+
+'prepare the excel sheet to be read
+F.Automation.MSExcel.CreateAppObject("MSExcel")
+F.Automation.MSExcel.OpenWorkbook("MSEXcel","Excel_Sheets",V.Global.sFileExcel_Result)
+F.Automation.MSExcel.OpenWorksheet("Excel_Sheets","Sheet",v.Screen.Selection!txtSheet.Text.Trim)
+Function.Automation.MSExcel.WriteCell("Sheet", 1, 9,"Result")
+Function.Automation.MSExcel.WriteCell("Sheet", 1, 10,"Reason")
+
+'get the number of rows of the current spreadsheet
+F.Automation.MSExcel.RowCount("Sheet",V.Local.iRowNum)
+f.ODBC.Connection!conX.Execute("Delete from GCG_4570_PassedCheck")
+f.Data.DataTable.Create("PassedCheck",true)
+f.Data.DataTable.AddColumn("PassedCheck","Customer","string","")
+f.Data.DataTable.AddColumn("PassedCheck","Part","string","")
+f.Data.DataTable.AddColumn("PassedCheck","Required","date")
+f.Data.DataTable.AddColumn("PassedCheck","Quantity","float")
+
+gui.ProcessBar.lblTotalRecord.Text(v.Local.iRowNum)
+gui.ProcessBar.progressBarCollectInfo.Max(v.Local.iRowNum)
+gui.ProcessBar.proBar.Value(2)
+
+'START AT 1 for title, then from 2 will be data for sales orders
+
+'Loop through the file,check each field, if valid, add row to table PassedCheck
+F.Intrinsic.Control.For(V.Local.iCounter,2,v.Local.iRowNum,1)
+	gui.ProcessBar.progressBarCollectInfo.Value(v.Local.iCounter)
+	gui.ProcessBar.lblRecord.Text(v.Local.iCounter)
+	v.Local.bGoodData.Set(True)
+	v.Local.bGoodPart.Set(True)
+	v.Local.bGoodCustomer.Set(True)
+	v.Local.bGoodRouter.Set(True)
+	v.Local.bGoodDate.Set(True)
+	v.Local.bGoodQty.Set(True)
+	F.Automation.MSExcel.ReadRow("Sheet",V.Local.iCounter,1,7,V.local.srow)
+	F.Intrinsic.String.Split(V.Local.srow,"*!*",V.Local.sCol)	
+'	v.local.sCol(0):Customer
+'	v.local.sCol(1):Part
+'	v.local.sCol(2):Description
+'	v.local.sCol(3):Delivery Date
+'	v.local.sCol(4):Orig Qty
+'	v.local.sCol(6):Rev 
+	
+	f.Intrinsic.Control.If(v.Local.sCol(0).Trim,<>,"")
+	f.Intrinsic.Control.AndIf(v.Local.sCol(1).Trim,<>,"")	
+		'Checking Rev		
+		F.Intrinsic.Control.If(V.Local.sCol(6).Trim,=,"0.0000000000")
+			v.Local.sRev.Set("00")
+		f.Intrinsic.Control.Else
+			f.Intrinsic.String.Trim(v.Local.sCol(6),v.Local.sRev)
+		f.Intrinsic.Control.EndIf
+		
+		'Checking if Part exists
+		f.Intrinsic.String.GSSPartString(v.local.sCol(1).Trim,v.Local.sRev,v.Local.sPart)
+		f.Intrinsic.String.Build("Select count(*) from Inventory_MSTR where Part = '{0}' ",v.Local.sPart,v.Local.sSQL)
+		f.ODBC.Connection!conX.ExecuteAndReturn(v.Local.sSQL,v.Local.iCheckResult)
+		F.Intrinsic.Control.If(v.Local.iCheckResult,=,0)
+			'Part does not exits
+			v.Local.bGoodData.Set(False)
+			v.Local.bGoodPart.Set(False)
+		f.Intrinsic.Control.EndIf		
+		
+		'Checking if Router exists
+		f.Intrinsic.String.Build("Select count(*) from Router_Header where Router = '{0}' ",v.Local.sPart,v.Local.sSQL)
+		f.ODBC.Connection!conX.ExecuteAndReturn(v.Local.sSQL,v.Local.iCheckResult)
+		F.Intrinsic.Control.If(v.Local.iCheckResult,=,0)
+			'Router does not exits
+			v.Local.bGoodData.Set(False)
+			v.Local.bGoodRouter.Set(False)
+		f.Intrinsic.Control.EndIf
+			
+		'Check if Customer exists
+		f.Intrinsic.String.Build("Select count(*) from V_Customer_Master where Customer = '{0}'",V.Local.sCol(0).Trim,v.Local.sSQL)
+		f.ODBC.Connection!conX.ExecuteAndReturn(v.Local.sSQL,v.Local.iCheckResult)
+		F.Intrinsic.Control.If(v.Local.iCheckResult,=,0)
+			'Customer does not exists
+			v.Local.bGoodData.Set(False)
+			v.Local.bGoodCustomer.Set(False)
+		f.Intrinsic.Control.EndIf
+		
+		'Check Delivery Date
+		f.Intrinsic.Date.IsDate(v.local.sCol(3).Trim,v.Local.bGoodDate)
+		f.Intrinsic.Control.If(v.Local.bGoodDate,=,False)		
+			'Date is not valid
+			v.Local.bGoodData.Set(False)
+		f.Intrinsic.Control.EndIf
+		
+		'Check Orig Qty
+		f.Intrinsic.Math.IsNumeric(v.Local.sCol(4).Trim,v.Local.bGoodQty)
+		f.Intrinsic.Control.If(v.Local.bGoodQty,=,False)		
+			'Qty is not valid
+			v.Local.bGoodData.Set(False)
+		f.Intrinsic.Control.EndIf	
+		
+		f.Intrinsic.Control.If(v.Local.bGoodData,=,True)
+			f.Intrinsic.Math.Add(v.Local.iNum,1,v.Local.iNum)
+			f.Data.DataTable.AddRow("PassedCheck", "Customer",v.local.sCol(0).Trim,"Part",v.Local.sPart,"Required",v.local.sCol(3).Trim,"Quantity",v.local.sCol(4).Trim)
+			Function.Automation.MSExcel.WriteCell("Sheet", v.Local.iCounter, 9,"Imported")			
+		f.Intrinsic.Control.Else
+			f.Intrinsic.Math.Add(v.Local.iError,1,v.Local.iError)
+			v.Local.sCheckError.Set("")
+			f.Intrinsic.Control.If(v.Local.bGoodCustomer,=,False)
+				v.Local.sCheckError.Set("Customer ")						
+			f.Intrinsic.Control.EndIf
+			
+			f.Intrinsic.Control.If(v.Local.bGoodPart,=,False)
+				f.Intrinsic.String.Concat(v.Local.sCheckError,"Part ",v.Local.sCheckError)						
+			f.Intrinsic.Control.EndIf
+			
+			f.Intrinsic.Control.If(v.Local.bGoodRouter,=,False)
+				f.Intrinsic.String.Concat(v.Local.sCheckError,"Router ",v.Local.sCheckError)						
+			f.Intrinsic.Control.EndIf
+			
+			f.Intrinsic.Control.If(v.Local.bGoodDate,=,False)
+				f.Intrinsic.String.Concat(v.Local.sCheckError,"Date ",v.Local.sCheckError)						
+			f.Intrinsic.Control.EndIf
+			
+			f.Intrinsic.Control.If(v.Local.bGoodQty,=,False)
+				f.Intrinsic.String.Concat(v.Local.sCheckError,"Qty",v.Local.sCheckError)						
+			f.Intrinsic.Control.EndIf
+			
+			Function.Automation.MSExcel.WriteCell("Sheet", v.Local.iCounter, 9,"Error")
+			Function.Automation.MSExcel.WriteCell("Sheet", v.Local.iCounter, 10,v.Local.sCheckError)
+			
+		f.Intrinsic.Control.EndIf
+
+	f.Intrinsic.Control.Else
+		f.Intrinsic.Math.Add(v.Local.iQuit,1,v.Local.iQuit)
+		f.Intrinsic.Control.If(v.Local.iQuit,>,5)
+			'This prevents programs to proceed with more than 5 blank rows
+			f.Intrinsic.Control.ExitFor(v.Local.iCounter)
+		f.Intrinsic.Control.EndIf
+	f.Intrinsic.Control.EndIf
+	
+f.Intrinsic.Control.Next(v.Local.iCounter)
+
+Function.Automation.MSExcel.SaveWorkBook("Excel_Sheets")
+F.Automation.MSExcel.DestroyAllObjects("MSExcel","Excel_Sheets","Sheet")
+
+gui.ProcessBar.proBar.Value(3)
+
+f.Intrinsic.Control.If(v.DataTable.PassedCheck.Rowcount,=,0)
+	f.Intrinsic.UI.Msgbox("No rows passed part & router checking or the sheet is empty")
+	f.Data.DataTable.Close("PassedCheck")
+	f.Intrinsic.Control.CallSub(form1_unload)
+f.Intrinsic.Control.Else
+	gui.ProcessBar.proBar.Value(4)
+	gui.ProcessBar.lblProcess.Text("...deleting old data")
+	f.Intrinsic.Control.CallSub(delete_system_tables_before_forecast)
+	gui.ProcessBar.proBar.Value(5)
+	gui.ProcessBar.lblProcess.Text("...importing data")
+	f.Intrinsic.Control.CallSub(import_to_table)
+f.Intrinsic.Control.EndIf
+
+gui.ProcessBar.proBar.Value(10)
+gui.ProcessBar.lblProcess.Text("Complete")
+
+f.Intrinsic.String.Concat(v.Local.iError," error rows. Please see result file in the same folder",v.Local.sHold)
+f.Intrinsic.UI.Msgbox(v.Local.sHold,"End")
+
+f.Intrinsic.Control.CallSub(form1_unload)
+
+F.Intrinsic.Control.ExitSub
+
+F.Intrinsic.Control.Label("cmdupload_click_Err")
+F.Intrinsic.Control.If(V.Ambient.ErrorNumber,<>,0)
+	Function.Intrinsic.String.Concat("Project: GCG_4418_UpSales_v1.g2u",V.Ambient.Newline,V.Ambient.Newline,"Subroutine: ",V.Ambient.CurrentSubroutine,V.Ambient.NewLine,"Error Occurred ",V.Ambient.ErrorNumber," with description ",V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+Function.Intrinsic.Control.EndIf
+
+
+Program.Sub.cmdupload_click.End
+
+Program.Sub.Delete_System_Tables_Before_Forecast.Start
+F.Intrinsic.Control.SetErrorHandler("Delete_System_Tables_Before_Forecast_Err")
+F.Intrinsic.Control.ClearErrors
+v.Local..BulkDeclareString(sError, sSQL, sJob)
+
+F.ODBC.Connection!Conx.OpenLocalRecordsetRO("rstDelJobSch","Select JOB, SUFFIX FROM FORECAST_HEADER;")
+F.Intrinsic.Control.DoUntil(V.ODBC.Conx!rstDelJobSch.EOF,=,"True")
+	V.Local.sJob.Set(V.ODBC.Conx!rstDelJobSch.FieldVal!JOB)
+	F.Intrinsic.Control.If(V.Local.sJob,<>,"")
+		F.Intrinsic.String.Build("DELETE from SCHED_WO_SUPP WHERE WO='{0}'",V.Local.sJob,V.Local.sSql)
+		F.ODBC.Connection!Conx.Execute(V.Local.sSql)
+	F.Intrinsic.Control.EndIf
+	F.ODBC.Conx!rstDelJobSch.MoveNext
+F.Intrinsic.Control.Loop
+
+F.ODBC.Connection!Conx.Execute("DELETE FROM FORECAST")
+F.ODBC.Connection!Conx.Execute("DELETE FROM FORECAST_COMMENTS")
+F.ODBC.Connection!Conx.Execute("DELETE FROM FORECAST_DETAIL")
+F.ODBC.Connection!Conx.Execute("DELETE FROM FORECAST_HEADER")
+F.ODBC.Connection!Conx.Execute("DELETE FROM FORECAST_HISTORY")
+F.ODBC.Connection!Conx.Execute("DELETE FROM FORECAST_IMPORT_HDR")
+F.ODBC.Connection!Conx.Execute("DELETE FROM FORECAST_IMPORT_LINE")
+F.ODBC.Connection!Conx.Execute("DELETE FROM FORECAST_OPS")
+F.ODBC.Connection!Conx.Execute("DELETE FROM FORECAST_REQ")
+F.ODBC.Connection!Conx.Execute("DELETE FROM FORECAST_SUMMARY")
+F.ODBC.Connection!Conx.Execute("DELETE FROM FORECAST_XREF")
+F.ODBC.Connection!Conx.Execute("DELETE FROM APSV3_JBLINES WHERE JOB LIKE 'F%' ")
+F.ODBC.Connection!Conx.Execute("DELETE FROM APSV3_JBMASTER WHERE JOB LIKE 'F%' ")
+F.ODBC.Connection!Conx.Execute("DELETE FROM APSV3_UBDETAIL WHERE JOB LIKE 'F%' ")
+F.ODBC.Connection!Conx.Execute("Update OP_HEADER Set ascii_flag = 'F' where id = '360020';")
+F.ODBC.Connection!Conx.Execute("Update OP_HEADER Set Text1 = 'F' where id = '360020';")
+F.ODBC.Connection!Conx.Execute("Update OP_Header set F_Numeric = 1 where id = '360020';")
+
+F.Intrinsic.Control.ExitSub
+
+F.Intrinsic.Control.Label("Delete_System_Tables_Before_Forecast_Err")
+F.Intrinsic.Control.If(V.Ambient.ErrorNumber,<>,0)
+	Function.Intrinsic.String.Concat("Project: GCG_4570_Forecast_Import.g2u",V.Ambient.Newline,V.Ambient.Newline,"Subroutine: ",V.Ambient.CurrentSubroutine,V.Ambient.NewLine,"Error Occurred ",V.Ambient.ErrorNumber," with description ",V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+Function.Intrinsic.Control.EndIf
+
+
+Program.Sub.Delete_System_Tables_Before_Forecast.End
+
+Program.Sub.Import_To_Table.Start
+F.Intrinsic.Control.SetErrorHandler("Import_To_Table_Err")
+F.Intrinsic.Control.ClearErrors
+v.Local..BulkDeclareString(sError, sSQL, sHold, sMap, sFilter, sKeyDate, sKeyTime, sKeySeq)
+v.Local..BulkDeclareLong(iCounter, iKeyTime, iProcessHeader)
+
+f.Intrinsic.String.Format(v.Ambient.Now,"YYYYMMDD",v.Local.sKeyDate)
+f.Data.DataTable.AddColumn("PassedCheck","Key_Date","string",v.Local.sKeyDate)
+f.Data.DataTable.AddColumn("PassedCheck","Key_Time","string","")
+f.Data.DataTable.AddColumn("PassedCheck","Key_Seq","long",0)
+f.Data.DataTable.AddColumn("PassedCheck","Type","float",2)
+f.Data.DataTable.AddColumn("PassedCheck","Start_Date","date",v.Ambient.Date)
+f.Data.DataTable.AddColumn("PassedCheck","Inv_Source","string","M")
+f.Data.DataTable.AddColumn("PassedCheck","IMPORT_SOURCE","string","I")
+f.Data.DataTable.AddColumn("PassedCheck","IMPORTED_BY","string",v.Caller.User)
+
+gui.ProcessBar.proBar.Value(6)
+gui.ProcessBar.lblCollectInfo.Text("...process Key Time")
+gui.ProcessBar.progressBarCollectInfo.Max(v.DataTable.PassedCheck.Rowcount)
+gui.ProcessBar.lblTotalRecord.Text(v.DataTable.PassedCheck.Rowcount)
+
+f.Intrinsic.Control.For(v.Local.iCounter,0,v.DataTable.PassedCheck.Rowcount--,1)
+	gui.ProcessBar.progressBarCollectInfo.Value(v.Local.iCounter)
+	gui.ProcessBar.lblRecord.Text(v.Local.iCounter)
+	f.Intrinsic.String.LPad(v.Local.iCounter,"0",8,v.Local.sHold)
+	f.Data.DataTable.SetValue("PassedCheck",v.Local.iCounter,"Key_Time",v.Local.sHold)	
+f.Intrinsic.Control.Next(v.Local.iCounter)
+gui.ProcessBar.progressBarCollectInfo.Value(v.DataTable.PassedCheck.Rowcount)
+gui.ProcessBar.lblRecord.Text(v.DataTable.PassedCheck.Rowcount)
+gui.ProcessBar.proBar.Value(7)
+gui.ProcessBar.lblProcess.Text("...saving to ForeCast Header")
+v.Local.sMap.Set("KEY_DATE@!@KEY_DATE*!*KEY_TIME@!@KEY_TIME*!*CUSTOMER@!@CUSTOMER*!*PART@!@PART*!*START_DATE@!@START_DATE*!*INV_SOURCE@!@INV_SOURCE*!*QUANTITY@!@QUANTITY*!*IMPORT_SOURCE@!@IMPORT_SOURCE*!*IMPORTED_BY@!@IMPORTED_BY")
+f.ODBC.Connection!conX.Execute("Delete from Forecast_import_hdr")
+Function.Data.DataTable.SaveToDB("PassedCheck", "conx", "Forecast_import_hdr", "",128, v.Local.sMap)
+
+gui.ProcessBar.proBar.Value(8)
+gui.ProcessBar.lblProcess.Text("...saving to ForeCast Line")
+v.Local.sMap.Set("KEY_DATE@!@KEY_DATE*!*KEY_TIME@!@KEY_TIME*!*KEY_SEQ@!@KEY_SEQ*!*REQUIRED@!@REQUIRED*!*QUANTITY@!@QUANTITY*!*TYPE@!@TYPE")
+f.ODBC.Connection!conX.Execute("Delete from Forecast_import_line")
+Function.Data.DataTable.SaveToDB("PassedCheck", "conx", "Forecast_import_line", "",128, v.Local.sMap)
+
+F.Intrinsic.Control.ExitSub
+
+F.Intrinsic.Control.Label("Import_To_Table_Err")
+F.Intrinsic.Control.If(V.Ambient.ErrorNumber,<>,0)
+	Function.Intrinsic.String.Concat("Project: GCG_4570_Forecast_Import.g2u",V.Ambient.Newline,V.Ambient.Newline,"Subroutine: ",V.Ambient.CurrentSubroutine,V.Ambient.NewLine,"Error Occurred ",V.Ambient.ErrorNumber," with description ",V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+Function.Intrinsic.Control.EndIf
+
+
+Program.Sub.Import_To_Table.End
+
+Program.Sub.Comments.Start
+${$0$}$GCG_RT_SO_UPLOAD$}$SFF$}$8/13/2014$}$False
+${$3$}$0$}$$}$0$}$-1$}$$}$12:00:00 AM$}$This will be a custom GAB script that will run from a custom Menu Item under Bill of Material -> File -> Custom Cobalt BOM Import.  The user will navigate to the xml file that needs to be loaded into Global Shop.  Once the xml is parsed there will be a search in Global Shop to see if a BOM already exists for that Part Number.  If one already exists a compare screen will display showing the differences between the two.  If one does not exist then the screen will display the BOM as it will be uploaded into Global Shop.  Any parts that are listed in the BOM that are not Inventory Parts will be highlighted in Yellow.  If there are any parts not in inventory the user will have the option to click the create Parts button to generate those parts in Global Shop.  If the BOM exists in Global shop then any differences on the new import will be highlighted in Red.  After the Parts have been created then the Upload button will upload and override any previous BOM for that part.}$12:00:00 AM
+Program.Sub.Comments.End
+
